@@ -27,16 +27,6 @@ public:
      * @param initial_value Initial value
      * @param read_cb Optional read callback
      * @param write_cb Optional write callback
-
-    /**
-     * @brief Generate a string overview of the service and its characteristics.
-     */
-    std::string overview() const;
-
-    /**
-     * @brief Print the overview using printf().
-     */
-    void print() const;
      * @return Reference to the newly added Characteristic
      */
     Characteristic& emplace_characteristic(const ble_uuid128_t& characteristic_uuid,

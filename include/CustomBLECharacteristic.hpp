@@ -39,16 +39,6 @@ public:
     void set_read_callback(ReadCallback callback);
     void set_write_callback(WriteCallback callback);
 
-    /**
-     * @brief Generate a string overview of the characteristic.
-     */
-    std::string overview() const;
-
-    /**
-     * @brief Print the overview using printf().
-     */
-    void print() const;
-
 private:
     ble_uuid128_t uuid;
     uint16_t handle;

@@ -39,16 +39,6 @@ public:
     ble_gatt_svc_def* get_svc_defs();
     size_t size() const;
 
-    /**
-     * @brief Generate a string overview of all services.
-     */
-    std::string overview() const;
-
-    /**
-     * @brief Print the overview using printf().
-     */
-    void print() const;
-
 private:
     void update_svc_defs();
 };

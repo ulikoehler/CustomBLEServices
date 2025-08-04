@@ -44,16 +44,6 @@ public:
     ble_gatt_chr_def* get_chr_defs();
     size_t size() const;
 
-    /**
-     * @brief Generate a string overview of all characteristics.
-     */
-    std::string overview() const;
-
-    /**
-     * @brief Print the overview using printf().
-     */
-    void print() const;
-
 private:
     void update_chr_defs();
 };

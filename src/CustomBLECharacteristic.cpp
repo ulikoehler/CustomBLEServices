@@ -1,5 +1,5 @@
 
-#include "CustomBLE/Characteristic.hpp"
+#include "CustomBLECharacteristic.hpp"
 
 namespace CustomBLE {
 std::string Characteristic::overview() const {
