@@ -23,7 +23,7 @@ void Characteristic::print() const {
     printf("%s", overview().c_str());
 }
 
-#include "CustomBLECharacteristic.hpp"
+
 static const char *TAG = "MetexonBLE";
 
 Characteristic::Characteristic(const ble_uuid128_t& characteristic_uuid, 

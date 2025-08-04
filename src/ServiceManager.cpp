@@ -22,6 +22,7 @@ int ServiceManager::add_services_to_nimble(const char* tag) const {
     }
     return 0;
 }
+#include "CustomBLEServiceManager.hpp"
 std::string ServiceManager::overview() const {
     std::string out = "ServiceManager overview:\n";
     size_t idx = 0;

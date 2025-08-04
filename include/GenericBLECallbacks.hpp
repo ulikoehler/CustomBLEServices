@@ -4,7 +4,6 @@
 #include <string>
 #include <functional>
 #include <cstring>
-
 template<typename T>
 std::function<std::string()> make_pointer_read_callback(T* value_ptr) {
     return [value_ptr]() {
