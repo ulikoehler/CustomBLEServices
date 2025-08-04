@@ -16,7 +16,7 @@ void Service::add_characteristic(std::shared_ptr<Characteristic> characteristic)
 }
 
 void Service::add_characteristic(Characteristic&& characteristic) {
-    characteristics_manager.add_characteristic(std::make_unique<Characteristic>(std::move(characteristic)));
+    characteristics_manager.add_characteristic(std::make_shared<Characteristic>(std::move(characteristic)));
 }
 
 ble_gatt_svc_def Service::get_svc_def() {
@@ -62,7 +62,7 @@ void Service::print() const {
     printf("%s", overview().c_str());
 }
 
-Characteristic& Service::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
+std::shared_ptr<Characteristic> Service::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
                                                 const std::string& initial_value,
                                                 Characteristic::ReadCallback read_cb,
                                                 Characteristic::WriteCallback write_cb) {

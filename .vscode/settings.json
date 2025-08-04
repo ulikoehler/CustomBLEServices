@@ -1,0 +1,12 @@
+{
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/include"
+    ],
+    "C_Cpp.default.cppStandard": "gnu++17",
+    "C_Cpp.default.compilerPath": "/usr/bin/g++",
+    "version": 4,
+    "files.associations": {
+        "memory": "cpp"
+    }
+}
+    

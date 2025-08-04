@@ -16,11 +16,10 @@ int ServiceManager::add_services_to_nimble(const char* tag) {
     return 0;
 }
 
-Service& ServiceManager::emplace_service(const ble_uuid128_t& uuid) {
-    auto service = std::make_unique<Service>(uuid);
-    Service* ptr = service.get();
-    add_service(std::move(service));
-    return *ptr;
+std::shared_ptr<Service> ServiceManager::emplace_service(const ble_uuid128_t& uuid) {
+    auto service = std::make_shared<Service>(uuid);
+    add_service(service);
+    return service;
 }
 
 std::string ServiceManager::overview() const {

@@ -5,14 +5,13 @@
 
 namespace CustomBLE {
 
-Characteristic& ServiceCharacteristicsManager::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
+std::shared_ptr<Characteristic> ServiceCharacteristicsManager::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
                                                                      const std::string& initial_value,
                                                                      Characteristic::ReadCallback read_cb,
                                                                      Characteristic::WriteCallback write_cb) {
-    auto characteristic = std::make_unique<Characteristic>(characteristic_uuid, initial_value, read_cb, write_cb);
-    Characteristic* ptr = characteristic.get();
-    add_characteristic(std::move(characteristic));
-    return *ptr;
+    auto characteristic = std::make_shared<Characteristic>(characteristic_uuid, initial_value, read_cb, write_cb);
+    add_characteristic(characteristic);
+    return characteristic;
 }
 
 std::string ServiceCharacteristicsManager::overview() const {

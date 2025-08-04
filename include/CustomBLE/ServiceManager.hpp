@@ -19,9 +19,9 @@ public:
     /**
      * @brief Emplace a new service inline (constructs and adds).
      * @param uuid UUID of the service
-     * @return Reference to the newly added Service
+     * @return Shared pointer to the newly added Service
      */
-    Service& emplace_service(const ble_uuid128_t& uuid);
+    std::shared_ptr<Service> emplace_service(const ble_uuid128_t& uuid);
     ble_gatt_svc_def* get_svc_defs();
     size_t size() const;
 
