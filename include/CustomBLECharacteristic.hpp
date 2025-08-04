@@ -2,39 +2,44 @@
 #pragma once
 #include <string>
 #include <functional>
-#include <cstring>
-#include "host/ble_uuid.h"
-#include "host/ble_gatt.h"
-#include "esp_log.h"
+#include <esp_log.h>
+#include <host/ble_gatt.h>
+#include <host/ble_uuid.h>
+#include <host/ble_hs.h>
 
-/**
- * @brief BLE GATT characteristic with configurable read/write callbacks.
- * 
- * This class wraps a BLE GATT characteristic, allowing you to specify
- * custom read and write behavior using std::function callbacks.
- * It manages the characteristic's UUID, value, and access flags.
- */
-class CustomBLECharacteristic {
+namespace CustomBLE {
+
+class Characteristic {
 public:
-    /**
-     * @brief Callback type for read operations.
-     * Should return the value to be sent to the BLE client.
-     */
     using ReadCallback = std::function<std::string()>;
-
-    /**
-     * @brief Callback type for write operations.
-     * Receives the value written by the BLE client.
-     */
     using WriteCallback = std::function<void(const std::string&)>;
 
+    Characteristic(const ble_uuid128_t& characteristic_uuid, 
+                  const std::string& initial_value,
+                  ReadCallback read_cb = nullptr,
+                  WriteCallback write_cb = nullptr);
+
+    int handle_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt);
+    static int gatt_access_callback(uint16_t conn_handle, uint16_t attr_handle,
+                                   struct ble_gatt_access_ctxt *ctxt, void *arg);
+
+    const ble_uuid_t* get_uuid() const;
+    uint16_t get_flags() const;
+    void set_handle(uint16_t char_handle);
+    uint16_t get_handle() const;
+    void set_read_callback(ReadCallback callback);
+    void set_write_callback(WriteCallback callback);
+
 private:
-    ble_uuid128_t uuid;              ///< 128-bit UUID for the characteristic
-    uint16_t handle;                 ///< GATT handle assigned by NimBLE
-    ReadCallback read_callback;      ///< Optional read callback
-    WriteCallback write_callback;    ///< Optional write callback
-    uint16_t flags;                  ///< BLE GATT characteristic flags
-    std::string default_value;       ///< Internal value if no callback is set
+    ble_uuid128_t uuid;
+    uint16_t handle;
+    ReadCallback read_callback;
+    WriteCallback write_callback;
+    std::string default_value;
+    uint16_t flags;
+};
+
+} // namespace CustomBLE
 
 public:
     /**

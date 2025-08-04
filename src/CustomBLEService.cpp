@@ -1,6 +1,9 @@
+
 #include "CustomBLEService.hpp"
 
-CustomBLEService::CustomBLEService(const ble_uuid128_t& uuid)
+namespace CustomBLE {
+
+Service::Service(const ble_uuid128_t& uuid)
     : service_uuid(uuid) {
     svc_def = {};
     svc_def.type = BLE_GATT_SVC_TYPE_PRIMARY;
@@ -10,11 +13,11 @@ CustomBLEService::CustomBLEService(const ble_uuid128_t& uuid)
     svc_defs.clear();
 }
 
-void CustomBLEService::add_characteristic(std::unique_ptr<CustomBLECharacteristic> characteristic) {
+void Service::add_characteristic(std::unique_ptr<Characteristic> characteristic) {
     characteristics_manager.add_characteristic(std::move(characteristic));
 }
 
-ble_gatt_svc_def* CustomBLEService::get_svc_defs() {
+ble_gatt_svc_def* Service::get_svc_defs() {
     svc_def.chrs = characteristics_manager.get_chr_defs();
     svc_defs.clear();
     svc_defs.push_back(svc_def);
@@ -25,6 +28,15 @@ ble_gatt_svc_def* CustomBLEService::get_svc_defs() {
     return svc_defs.data();
 }
 
-CustomBLECharacteristicsManager& CustomBLEService::get_characteristics_manager() {
+CharacteristicsManager& Service::get_characteristics_manager() {
     return characteristics_manager;
 }
+
+Characteristic& Service::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
+                                                const std::string& initial_value,
+                                                Characteristic::ReadCallback read_cb,
+                                                Characteristic::WriteCallback write_cb) {
+    return characteristics_manager.emplace_characteristic(characteristic_uuid, initial_value, read_cb, write_cb);
+}
+
+} // namespace CustomBLE

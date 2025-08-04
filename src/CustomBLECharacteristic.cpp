@@ -1,8 +1,12 @@
+
 #include "CustomBLECharacteristic.hpp"
+
+namespace CustomBLE {
+
 
 static const char *TAG = "MetexonBLE";
 
-CustomBLECharacteristic::CustomBLECharacteristic(const ble_uuid128_t& characteristic_uuid, 
+Characteristic::Characteristic(const ble_uuid128_t& characteristic_uuid, 
                                  const std::string& initial_value,
                                  ReadCallback read_cb,
                                  WriteCallback write_cb)
@@ -22,7 +26,7 @@ CustomBLECharacteristic::CustomBLECharacteristic(const ble_uuid128_t& characteri
     }
 }
 
-int CustomBLECharacteristic::handle_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt) {
+int Characteristic::handle_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt) {
     int rc;
     switch (ctxt->op) {
         case BLE_GATT_ACCESS_OP_READ_CHR: {
@@ -60,38 +64,40 @@ int CustomBLECharacteristic::handle_access(uint16_t conn_handle, uint16_t attr_h
     }
 }
 
-int CustomBLECharacteristic::gatt_access_callback(uint16_t conn_handle, uint16_t attr_handle,
+int Characteristic::gatt_access_callback(uint16_t conn_handle, uint16_t attr_handle,
                                    struct ble_gatt_access_ctxt *ctxt, void *arg) {
-    CustomBLECharacteristic* characteristic = static_cast<CustomBLECharacteristic*>(arg);
+    Characteristic* characteristic = static_cast<Characteristic*>(arg);
     return characteristic->handle_access(conn_handle, attr_handle, ctxt);
 }
 
-const ble_uuid_t* CustomBLECharacteristic::get_uuid() const {
+const ble_uuid_t* Characteristic::get_uuid() const {
     return &uuid.u;
 }
 
-uint16_t CustomBLECharacteristic::get_flags() const {
+uint16_t Characteristic::get_flags() const {
     return flags;
 }
 
-void CustomBLECharacteristic::set_handle(uint16_t char_handle) {
+void Characteristic::set_handle(uint16_t char_handle) {
     handle = char_handle;
 }
 
-uint16_t CustomBLECharacteristic::get_handle() const {
+uint16_t Characteristic::get_handle() const {
     return handle;
 }
 
-void CustomBLECharacteristic::set_read_callback(ReadCallback callback) {
+void Characteristic::set_read_callback(ReadCallback callback) {
     read_callback = callback;
     if (callback && !(flags & BLE_GATT_CHR_F_READ)) {
         flags |= BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_NOTIFY;
     }
 }
 
-void CustomBLECharacteristic::set_write_callback(WriteCallback callback) {
+void Characteristic::set_write_callback(WriteCallback callback) {
     write_callback = callback;
     if (callback && !(flags & BLE_GATT_CHR_F_WRITE)) {
         flags |= BLE_GATT_CHR_F_WRITE;
     }
+
+} // namespace CustomBLE
 }

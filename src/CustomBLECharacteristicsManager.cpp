@@ -1,11 +1,14 @@
 #include "CustomBLECharacteristicsManager.hpp"
 
-void CustomBLECharacteristicsManager::add_characteristic(std::unique_ptr<CustomBLECharacteristic> characteristic) {
+
+namespace CustomBLE {
+
+void CharacteristicsManager::add_characteristic(std::unique_ptr<Characteristic> characteristic) {
     CharacteristicEntry entry;
     entry.characteristic = std::move(characteristic);
     entry.chr_def = {
         entry.characteristic->get_uuid(),
-        CustomBLECharacteristic::gatt_access_callback,
+        Characteristic::gatt_access_callback,
         entry.characteristic.get(),
         nullptr, // descriptors
         entry.characteristic->get_flags(),
@@ -15,6 +18,16 @@ void CustomBLECharacteristicsManager::add_characteristic(std::unique_ptr<CustomB
     };
     entries.push_back(std::move(entry));
     update_chr_defs();
+}
+
+Characteristic& CharacteristicsManager::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
+                                                               const std::string& initial_value,
+                                                               Characteristic::ReadCallback read_cb,
+                                                               Characteristic::WriteCallback write_cb) {
+    auto characteristic = std::make_unique<Characteristic>(characteristic_uuid, initial_value, read_cb, write_cb);
+    Characteristic* ptr = characteristic.get();
+    add_characteristic(std::move(characteristic));
+    return *ptr;
 }
 
 ble_gatt_chr_def* CustomBLECharacteristicsManager::get_chr_defs() {
