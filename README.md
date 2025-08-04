@@ -174,6 +174,16 @@ service.emplace_characteristic(char_uuid, "FixedValue", read_cb, write_cb);
 ```
 
 ## Notes
-- All manager classes support emplace-like methods for inline construction.
-- Use the `CustomBLE` namespace for all types.
-- See ESP-IDF NimBLE documentation for registration details.
+    - All manager classes support emplace-like methods for inline construction.
+    - Use the `CustomBLE` namespace for all types.
+    - See ESP-IDF NimBLE documentation for registration details.
+
+## Generating BLE UUID Macros
+
+To easily generate a C++ macro for a 128-bit BLE UUID, use the provided script:
+
+```sh
+python3 generate_bluetooth_uuid.py
+```
+
+This will output a line starting with `BLE_UUID128_INIT(` containing the UUID bytes in the correct format for use in your code. No parameters are required.
