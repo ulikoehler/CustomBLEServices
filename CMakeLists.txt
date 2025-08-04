@@ -1,10 +1,9 @@
 
 idf_component_register(
-    SRCS "src/Characteristic.cpp"
-         "src/CharacteristicsManager.cpp"
-         "src/Service.cpp"
-         "src/ServiceCharacteristicsManager.cpp"
-         "src/ServiceManager.cpp"
+    SRCS "src/CustomBLE/Characteristic.cpp"
+         "src/CustomBLE/CharacteristicsManager.cpp"
+         "src/CustomBLE/Service.cpp"
+         "src/CustomBLE/ServiceManager.cpp"
     INCLUDE_DIRS "include"
     REQUIRES bt
 )
