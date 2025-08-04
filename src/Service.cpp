@@ -8,8 +8,7 @@ Service::Service(const ble_uuid128_t& uuid)
     svc_def.type = BLE_GATT_SVC_TYPE_PRIMARY;
     svc_def.uuid = &service_uuid.u;
     svc_def.includes = nullptr;
-    // svc_def.chrs = nullptr; // Will be set in get_svc_defs() -- REMOVE, not present in ble_gatt_svc_def
-    svc_defs.clear();
+    // svc_def.chrs = nullptr; // Will be set in get_svc_def() -- REMOVE, not present in ble_gatt_svc_def
 }
 
 void Service::add_characteristic(std::unique_ptr<Characteristic> characteristic) {
@@ -20,15 +19,9 @@ void Service::add_characteristic(Characteristic&& characteristic) {
     characteristics_manager.add_characteristic(std::make_unique<Characteristic>(std::move(characteristic)));
 }
 
-ble_gatt_svc_def* Service::get_svc_defs() {
+ble_gatt_svc_def Service::get_svc_def() {
     // svc_def.chrs = characteristics_manager.get_chr_defs(); // REMOVE, not present in ble_gatt_svc_def
-    svc_defs.clear();
-    svc_defs.push_back(svc_def);
-    // End marker
-    ble_gatt_svc_def end_marker = {};
-    end_marker.type = 0;
-    svc_defs.push_back(end_marker);
-    return svc_defs.data();
+    return svc_def;
 }
 
 CharacteristicsManager& Service::get_characteristics_manager() {

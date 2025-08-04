@@ -55,11 +55,8 @@ size_t ServiceManager::size() const {
 void ServiceManager::update_svc_defs() {
     svc_defs.clear();
     for (const auto& service : services) {
-        ble_gatt_svc_def* svc_array = service->get_svc_defs();
-        // Add all but the end marker from each service
-        for (size_t i = 0; svc_array[i].type != 0; ++i) {
-            svc_defs.push_back(svc_array[i]);
-        }
+        ble_gatt_svc_def svc_def = service->get_svc_def();
+        svc_defs.push_back(svc_def);
     }
     // Always ensure the last element is the end marker
     ble_gatt_svc_def end_marker = {};
