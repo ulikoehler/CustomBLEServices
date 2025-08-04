@@ -18,6 +18,7 @@ private:
 public:
     Service(const ble_uuid128_t& uuid);
     void add_characteristic(std::unique_ptr<Characteristic> characteristic);
+    void add_characteristic(Characteristic&& characteristic);
     ble_gatt_svc_def* get_svc_defs();
     CharacteristicsManager& get_characteristics_manager();
 

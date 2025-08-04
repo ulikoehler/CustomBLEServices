@@ -17,6 +17,10 @@ void Service::add_characteristic(std::unique_ptr<Characteristic> characteristic)
     characteristics_manager.add_characteristic(std::move(characteristic));
 }
 
+void Service::add_characteristic(Characteristic&& characteristic) {
+    characteristics_manager.add_characteristic(std::make_unique<Characteristic>(std::move(characteristic)));
+}
+
 ble_gatt_svc_def* Service::get_svc_defs() {
     svc_def.chrs = characteristics_manager.get_chr_defs();
     svc_defs.clear();

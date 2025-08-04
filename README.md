@@ -5,9 +5,9 @@ Framework for simplifying adding custom BLE services/characteristics on the ESP3
 ## Simple Example: One Service, One Characteristic
 
 ```cpp
-#include <CustomBLEServiceManager.hpp>
-#include <CustomBLEService.hpp>
-#include <CustomBLECharacteristic.hpp>
+#include <CustomBLE/ServiceManager.hpp>
+#include <CustomBLE/Service.hpp>
+#include <CustomBLE/Characteristic.hpp>
 
 using namespace CustomBLE;
 
@@ -24,11 +24,77 @@ ble_gatt_svc_def* svc_defs = service_manager.get_svc_defs();
 // ...register svc_defs with NimBLE...
 ```
 
+## Quick Start: Pointer-Based Characteristics
+
+### Read-Only Characteristic from Pointer
+```cpp
+#include <CustomBLE/ServiceManager.hpp>
+#include <CustomBLE/Service.hpp>
+#include <CustomBLE/Characteristic.hpp>
+
+int sensor_value = 42;
+ble_uuid128_t char_uuid = {/* ... */};
+
+ServiceManager service_manager;
+Service& service = service_manager.emplace_service(service_uuid);
+
+// Method 1: Using callback makers with emplace
+auto read_cb = Characteristic::make_pointer_read_callback(&sensor_value);
+service.emplace_characteristic(char_uuid, "", read_cb);
+
+// Method 2: Using factory method to create complete characteristic
+auto characteristic = Characteristic::from_pointer_read_only(char_uuid, &sensor_value);
+service.add_characteristic(std::move(characteristic));
+```
+
+### Read-Write Characteristic from Pointer
+```cpp
+#include <CustomBLE/ServiceManager.hpp>
+#include <CustomBLE/Service.hpp>
+#include <CustomBLE/Characteristic.hpp>
+
+float config_value = 3.14f;
+ble_uuid128_t char_uuid = {/* ... */};
+
+ServiceManager service_manager;
+Service& service = service_manager.emplace_service(service_uuid);
+
+// Method 1: Using callback makers with emplace
+auto read_cb = Characteristic::make_pointer_read_callback(&config_value);
+auto write_cb = Characteristic::make_pointer_write_callback(&config_value);
+service.emplace_characteristic(char_uuid, "", read_cb, write_cb);
+
+// Method 2: Using factory method to create complete characteristic
+auto characteristic = Characteristic::from_pointer_read_write(char_uuid, &config_value);
+service.add_characteristic(std::move(characteristic));
+```
+
+### Write-Only Characteristic from Pointer
+```cpp
+#include <CustomBLE/ServiceManager.hpp>
+#include <CustomBLE/Service.hpp>
+#include <CustomBLE/Characteristic.hpp>
+
+int command_value = 0;
+ble_uuid128_t char_uuid = {/* ... */};
+
+ServiceManager service_manager;
+Service& service = service_manager.emplace_service(service_uuid);
+
+// Create write-only characteristic directly from pointer
+auto characteristic = Characteristic::from_pointer_write_only(char_uuid, &command_value);
+service.add_characteristic(std::move(characteristic));
+```
+
 ## Comprehensive Usage Examples
 
 ### 1. Adding Characteristics Inline (Emplace)
 
 ```cpp
+#include <CustomBLE/ServiceManager.hpp>
+#include <CustomBLE/Service.hpp>
+#include <CustomBLE/Characteristic.hpp>
+
 ServiceManager service_manager;
 ble_uuid128_t service_uuid = {/* ... */};
 Service& service = service_manager.emplace_service(service_uuid);
@@ -44,6 +110,8 @@ service.emplace_characteristic(char_uuid, my_value, read_cb, write_cb);
 ### 2. Using Manager Classes Directly
 
 ```cpp
+#include <CustomBLE/CharacteristicsManager.hpp>
+
 CharacteristicsManager char_manager;
 char_manager.emplace_characteristic(char_uuid, "Value");
 ble_gatt_chr_def* chr_defs = char_manager.get_chr_defs();
@@ -52,6 +120,9 @@ ble_gatt_chr_def* chr_defs = char_manager.get_chr_defs();
 ### 3. Full Service Setup and Registration
 
 ```cpp
+#include <CustomBLE/ServiceManager.hpp>
+#include <CustomBLE/Service.hpp>
+
 ServiceManager service_manager;
 ble_uuid128_t service_uuid = {/* ... */};
 Service& service = service_manager.emplace_service(service_uuid);
@@ -67,10 +138,41 @@ ble_gatt_svc_def* svc_defs = service_manager.get_svc_defs();
 
 ### 4. Advanced: ServiceCharacteristicsManager
 
+
 ```cpp
+#include <CustomBLE/ServiceCharacteristicsManager.hpp>
+
 ServiceCharacteristicsManager adv_manager;
 adv_manager.emplace_characteristic(char_uuid, "Advanced", read_cb, write_cb);
 ble_gatt_chr_def* chr_defs = adv_manager.get_chr_defs();
+```
+
+### 5. Using GenericCallbacks for Read/Write
+
+These callbacks simplify read/write operations when dealing with fixed or pointer-based values.
+
+#### Pointer-Based Callbacks
+```cpp
+#include <CustomBLE/GenericCallbacks.hpp>
+#include <CustomBLE/Characteristic.hpp>
+
+int my_int = 42;
+auto read_cb = make_pointer_read_callback(&my_int);
+auto write_cb = make_pointer_write_callback(&my_int);
+
+service.emplace_characteristic(char_uuid, "IntValue", read_cb, write_cb);
+```
+
+#### Fixed Value Callbacks
+```cpp
+#include <CustomBLE/GenericCallbacks.hpp>
+#include <CustomBLE/Characteristic.hpp>
+
+std::string my_value = "Initial";
+auto read_cb = make_fixed_read_callback(my_value);
+auto write_cb = make_fixed_write_callback(my_value);
+
+service.emplace_characteristic(char_uuid, "FixedValue", read_cb, write_cb);
 ```
 
 ## Notes
