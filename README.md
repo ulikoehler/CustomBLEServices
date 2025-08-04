@@ -36,6 +36,71 @@ service->add_characteristic(Characteristic::from_fixed_value(
 );
 ```
 
+## Binary Conversion Utility: ToBinaryString
+
+The `ToBinaryString` template function allows you to convert any C++ datatype (such as `int`, `float`, or structs) into a `std::string` (which *CustomBLE* uses for memory management) containing its raw binary representation..
+
+**Header:**
+```cpp
+#include <CustomBLE/DataConversion.hpp>
+```
+
+**Example Usage:**
+```cpp
+#include <CustomBLE/DataConversion.hpp>
+#include <iostream>
+
+struct MyStruct {
+    int a;
+    float b;
+};
+
+int main() {
+    int x = 42;
+    float y = 3.14f;
+    MyStruct s{7, 2.71f};
+
+    std::string bin_x = ToBinaryString(x);      // bin_x.size() == sizeof(int)
+    std::string bin_y = ToBinaryString(y);      // bin_y.size() == sizeof(float)
+    std::string bin_s = ToBinaryString(s);      // bin_s.size() == sizeof(MyStruct)
+
+    // Print sizes
+    std::cout << "int: " << bin_x.size() << " bytes\n";
+    std::cout << "float: " << bin_y.size() << " bytes\n";
+    std::cout << "MyStruct: " << bin_s.size() << " bytes\n";
+
+    // Note: The binary strings contain non-printable characters
+}
+```
+
+**Notes:**
+
+## Example: BLE Characteristic with Binary Float Value
+
+You can use `ToBinaryString` to expose sensor values (such as a float) as raw binary data via a BLE characteristic. This is useful for transmitting precise values without string conversion overhead.
+
+```cpp
+#include <CustomBLE/ServiceManager.hpp>
+#include <CustomBLE/Service.hpp>
+#include <CustomBLE/Characteristic.hpp>
+#include <CustomBLE/DataConversion.hpp>
+
+// Assume you have a sensor object with a readCurrentAmperes() method returning float
+extern MotorCurrentSensor getriebemotorCurrentSense;
+ble_uuid128_t motorCurrentUUID = {/* ... */};
+
+ServiceManager service_manager;
+std::shared_ptr<Service> metexonBLEService = service_manager.emplace_service(/* service UUID */);
+
+// Add a characteristic that returns the current as raw binary float
+metexonBLEService->emplace_characteristic(
+    motorCurrentUUID,
+    []() { return ToBinaryString<float>(getriebemotorCurrentSense.readCurrentAmperes()); }
+);
+```
+
+**Note:** The BLE client must interpret the characteristic value as a 4-byte IEEE 754 float. **No endianess conversion is performed!**, so ensure the client reads it correctly based on the platform's endianness.
+
 ## Quick Start: Pointer-Based Characteristics
 
 ### Read-Only Characteristic from Pointer
