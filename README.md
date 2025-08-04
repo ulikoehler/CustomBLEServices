@@ -17,7 +17,7 @@ ble_uuid128_t char_uuid = {/* ... fill with your UUID ... */};
 
 ServiceManager service_manager;
 Service& service = service_manager.emplace_service(service_uuid);
-service.emplace_characteristic(char_uuid, "Hello BLE!");
+service.add_characteristic(Characteristic::from_fixed_value(char_uuid, "Hello BLE!"));
 
 // Register with NimBLE (see ESP-IDF docs for details)
 service_manager.add_services_to_nimble();

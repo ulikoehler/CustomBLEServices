@@ -76,6 +76,12 @@ public:
         auto write_cb = make_pointer_write_callback(value_ptr);
         return Characteristic(uuid, "", nullptr, write_cb);
     }
+    
+    // Static factory method for fixed value (read-only) characteristics
+    static Characteristic from_fixed_value(const ble_uuid128_t& uuid, const std::string& value) {
+        ReadCallback read_cb = [value]() { return value; };
+        return Characteristic(uuid, value, read_cb, nullptr);
+    }
 
 private:
     ble_uuid128_t uuid;
