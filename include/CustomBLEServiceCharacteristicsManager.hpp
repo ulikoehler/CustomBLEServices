@@ -1,4 +1,12 @@
+    /**
+     * @brief Generate a string overview of all characteristics.
+     */
+    std::string overview() const;
 
+    /**
+     * @brief Print the overview using printf().
+     */
+    void print() const;
 #pragma once
 #include "CustomBLECharacteristic.hpp"
 #include <vector>
@@ -51,3 +59,7 @@ private:
 };
 
 } // namespace CustomBLE
+     * @brief Update the internal chr_defs vector, ensuring the last element is the end marker.
+     */
+    void update_chr_defs();
+};
