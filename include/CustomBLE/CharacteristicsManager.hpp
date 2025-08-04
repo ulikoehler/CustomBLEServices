@@ -35,7 +35,6 @@ public:
      * @return Shared pointer to the newly added Characteristic
      */
     std::shared_ptr<Characteristic> emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
-                                           const std::string& initial_value,
                                            Characteristic::ReadCallback read_cb = nullptr,
                                            Characteristic::WriteCallback write_cb = nullptr);
 

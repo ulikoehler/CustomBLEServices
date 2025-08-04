@@ -44,10 +44,9 @@ void CharacteristicsManager::add_characteristic(std::shared_ptr<Characteristic> 
 }
 
 std::shared_ptr<Characteristic> CharacteristicsManager::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
-                                                               const std::string& initial_value,
                                                                Characteristic::ReadCallback read_cb,
                                                                Characteristic::WriteCallback write_cb) {
-    auto characteristic = std::make_shared<Characteristic>(characteristic_uuid, initial_value, read_cb, write_cb);
+    auto characteristic = std::make_shared<Characteristic>(characteristic_uuid, read_cb, write_cb);
     add_characteristic(characteristic);
     return characteristic;
 }
