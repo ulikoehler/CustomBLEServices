@@ -1,15 +1,8 @@
-Service& ServiceManager::emplace_service(const ble_uuid128_t& uuid) {
-    auto service = std::make_unique<Service>(uuid);
-    Service* ptr = service.get();
-    add_service(std::move(service));
-    return *ptr;
-}
-
-#include "CustomBLEServiceManager.hpp"
+#include "CustomBLE/ServiceManager.hpp"
 
 namespace CustomBLE {
-int ServiceManager::add_services_to_nimble(const char* tag) const {
-    ble_gatt_svc_def* svcs = const_cast<ble_gatt_svc_def*>(get_svc_defs());
+int ServiceManager::add_services_to_nimble(const char* tag) {
+    ble_gatt_svc_def* svcs = get_svc_defs();
     int rc = ble_gatts_count_cfg(svcs);
     if (rc != 0) {
         ESP_LOGE(tag, "Failed to count GATT services: %d", rc);
@@ -22,7 +15,14 @@ int ServiceManager::add_services_to_nimble(const char* tag) const {
     }
     return 0;
 }
-#include "CustomBLEServiceManager.hpp"
+
+Service& ServiceManager::emplace_service(const ble_uuid128_t& uuid) {
+    auto service = std::make_unique<Service>(uuid);
+    Service* ptr = service.get();
+    add_service(std::move(service));
+    return *ptr;
+}
+
 std::string ServiceManager::overview() const {
     std::string out = "ServiceManager overview:\n";
     size_t idx = 0;

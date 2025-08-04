@@ -6,4 +6,5 @@ idf_component_register(
          "src/ServiceCharacteristicsManager.cpp"
          "src/ServiceManager.cpp"
     INCLUDE_DIRS "include"
+    REQUIRES bt
 )

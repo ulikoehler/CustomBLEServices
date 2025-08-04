@@ -1,6 +1,6 @@
 
 #pragma once
-#include "CustomBLECharacteristicsManager.hpp"
+#include "CustomBLE/CharacteristicsManager.hpp"
 #include "host/ble_uuid.h"
 #include "host/ble_gatt.h"
 #include <memory>

@@ -1,15 +1,17 @@
-#include "Characteristic.hpp"
+#include "CustomBLE/Characteristic.hpp"
+
+static const char *TAG = "CustomBLE/Characteristic";
 
 namespace CustomBLE {
 std::string Characteristic::overview() const {
     char uuid_str[40];
     snprintf(uuid_str, sizeof(uuid_str),
         "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-        uuid.u.u128[0], uuid.u.u128[1], uuid.u.u128[2], uuid.u.u128[3],
-        uuid.u.u128[4], uuid.u.u128[5],
-        uuid.u.u128[6], uuid.u.u128[7],
-        uuid.u.u128[8], uuid.u.u128[9],
-        uuid.u.u128[10], uuid.u.u128[11], uuid.u.u128[12], uuid.u.u128[13], uuid.u.u128[14], uuid.u.u128[15]);
+        uuid.value[0], uuid.value[1], uuid.value[2], uuid.value[3],
+        uuid.value[4], uuid.value[5],
+        uuid.value[6], uuid.value[7],
+        uuid.value[8], uuid.value[9],
+        uuid.value[10], uuid.value[11], uuid.value[12], uuid.value[13], uuid.value[14], uuid.value[15]);
     std::string out = "Characteristic UUID: ";
     out += uuid_str;
     out += "\nValue: ";

@@ -1,5 +1,5 @@
-#include "CustomBLECharacteristicsManager.hpp"
 
+#include "CustomBLE/CharacteristicsManager.hpp"
 
 namespace CustomBLE {
 std::string CharacteristicsManager::overview() const {
@@ -10,11 +10,11 @@ std::string CharacteristicsManager::overview() const {
         const ble_uuid128_t* cu = reinterpret_cast<const ble_uuid128_t*>(entry.characteristic->get_uuid());
         snprintf(char_uuid_str, sizeof(char_uuid_str),
             "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-            cu->u.u128[0], cu->u.u128[1], cu->u.u128[2], cu->u.u128[3],
-            cu->u.u128[4], cu->u.u128[5],
-            cu->u.u128[6], cu->u.u128[7],
-            cu->u.u128[8], cu->u.u128[9],
-            cu->u.u128[10], cu->u.u128[11], cu->u.u128[12], cu->u.u128[13], cu->u.u128[14], cu->u.u128[15]);
+            cu->value[0], cu->value[1], cu->value[2], cu->value[3],
+            cu->value[4], cu->value[5],
+            cu->value[6], cu->value[7],
+            cu->value[8], cu->value[9],
+            cu->value[10], cu->value[11], cu->value[12], cu->value[13], cu->value[14], cu->value[15]);
         out += "  [" + std::to_string(idx++) + "] UUID: ";
         out += char_uuid_str;
         out += "\n";
@@ -36,7 +36,7 @@ void CharacteristicsManager::add_characteristic(std::unique_ptr<Characteristic> 
         nullptr, // descriptors
         entry.characteristic->get_flags(),
         0, // min_key_size
-        &entry.characteristic->handle,
+        nullptr, // handle pointer (set elsewhere if needed)
         nullptr // cpfd
     };
     entries.push_back(std::move(entry));
@@ -53,16 +53,16 @@ Characteristic& CharacteristicsManager::emplace_characteristic(const ble_uuid128
     return *ptr;
 }
 
-ble_gatt_chr_def* CustomBLECharacteristicsManager::get_chr_defs() {
+ble_gatt_chr_def* CharacteristicsManager::get_chr_defs() {
     update_chr_defs();
     return chr_defs.data();
 }
 
-size_t CustomBLECharacteristicsManager::size() const {
+size_t CharacteristicsManager::size() const {
     return entries.size();
 }
 
-void CustomBLECharacteristicsManager::update_chr_defs() {
+void CharacteristicsManager::update_chr_defs() {
     chr_defs.clear();
     for (const auto& entry : entries) {
         chr_defs.push_back(entry.chr_def);
@@ -72,3 +72,5 @@ void CustomBLECharacteristicsManager::update_chr_defs() {
     end_marker.uuid = nullptr;
     chr_defs.push_back(end_marker);
 }
+
+} // namespace CustomBLE

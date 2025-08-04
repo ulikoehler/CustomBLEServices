@@ -1,5 +1,5 @@
 #pragma once
-#include "CustomBLECharacteristic.hpp"
+#include "CustomBLE/Characteristic.hpp"
 #include <vector>
 #include <memory>
 #include <cstddef>
@@ -16,6 +16,9 @@ public:
 private:
     std::vector<CharacteristicEntry> entries;
     std::vector<ble_gatt_chr_def> chr_defs;
+public:
+    // Add public accessor for entries
+    const std::vector<CharacteristicEntry>& get_entries() const { return entries; }
 
 public:
     /**
