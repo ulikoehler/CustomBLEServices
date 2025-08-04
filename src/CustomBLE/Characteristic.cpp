@@ -5,12 +5,19 @@ static const char *TAG = "CustomBLE/Characteristic";
 namespace CustomBLE {
 std::string Characteristic::overview() const {
     char uuid_str[40];
+    // BLE UUID 128-bit: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    // The first three fields are little-endian, the rest are big-endian
     snprintf(uuid_str, sizeof(uuid_str),
         "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-        uuid.value[0], uuid.value[1], uuid.value[2], uuid.value[3],
-        uuid.value[4], uuid.value[5],
-        uuid.value[6], uuid.value[7],
+        // time_low (4 bytes, little-endian)
+        uuid.value[3], uuid.value[2], uuid.value[1], uuid.value[0],
+        // time_mid (2 bytes, little-endian)
+        uuid.value[5], uuid.value[4],
+        // time_hi_and_version (2 bytes, little-endian)
+        uuid.value[7], uuid.value[6],
+        // clock_seq_hi_res, clock_seq_low (2 bytes, big-endian)
         uuid.value[8], uuid.value[9],
+        // node (6 bytes, big-endian)
         uuid.value[10], uuid.value[11], uuid.value[12], uuid.value[13], uuid.value[14], uuid.value[15]);
     std::string out = "Characteristic UUID: ";
     out += uuid_str;
