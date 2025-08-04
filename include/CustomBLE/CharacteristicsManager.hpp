@@ -9,7 +9,7 @@ namespace CustomBLE {
 class CharacteristicsManager {
 public:
     struct CharacteristicEntry {
-        std::unique_ptr<Characteristic> characteristic;
+        std::shared_ptr<Characteristic> characteristic;
         ble_gatt_chr_def chr_def;
     };
 
@@ -25,7 +25,7 @@ public:
      * @brief Add a new characteristic to the manager.
      * @param characteristic Unique pointer to a Characteristic
      */
-    void add_characteristic(std::unique_ptr<Characteristic> characteristic);
+    void add_characteristic(std::shared_ptr<Characteristic> characteristic);
 
     /**
      * @brief Emplace a new characteristic inline (constructs and adds).

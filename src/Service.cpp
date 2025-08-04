@@ -11,7 +11,7 @@ Service::Service(const ble_uuid128_t& uuid)
     // svc_def.chrs = nullptr; // Will be set in get_svc_def() -- REMOVE, not present in ble_gatt_svc_def
 }
 
-void Service::add_characteristic(std::unique_ptr<Characteristic> characteristic) {
+void Service::add_characteristic(std::shared_ptr<Characteristic> characteristic) {
     characteristics_manager.add_characteristic(std::move(characteristic));
 }
 

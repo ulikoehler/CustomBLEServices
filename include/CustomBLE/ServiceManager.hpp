@@ -10,11 +10,11 @@ namespace CustomBLE {
 
 class ServiceManager {
 private:
-    std::vector<std::unique_ptr<Service>> services;
+    std::vector<std::shared_ptr<Service>> services;
     std::vector<ble_gatt_svc_def> svc_defs;
 
 public:
-    void add_service(std::unique_ptr<Service> service);
+    void add_service(std::shared_ptr<Service> service);
 
     /**
      * @brief Emplace a new service inline (constructs and adds).

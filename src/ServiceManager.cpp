@@ -38,7 +38,7 @@ void ServiceManager::print() const {
     printf("%s", overview().c_str());
 }
 
-void ServiceManager::add_service(std::unique_ptr<Service> service) {
+void ServiceManager::add_service(std::shared_ptr<Service> service) {
     services.push_back(std::move(service));
     update_svc_defs();
 }

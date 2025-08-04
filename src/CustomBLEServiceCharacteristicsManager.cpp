@@ -1,10 +1,3 @@
-
-#include "CustomBLE/ServiceCharacteristicsManager.hpp"
-#include "CustomBLE/Characteristic.hpp"
-#include <memory>
-
-namespace CustomBLE {
-
 Characteristic& ServiceCharacteristicsManager::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
                                                                      const std::string& initial_value,
                                                                      Characteristic::ReadCallback read_cb,
@@ -15,6 +8,9 @@ Characteristic& ServiceCharacteristicsManager::emplace_characteristic(const ble_
     return *ptr;
 }
 
+#include "CustomBLEServiceCharacteristicsManager.hpp"
+
+namespace CustomBLE {
 std::string ServiceCharacteristicsManager::overview() const {
     std::string out = "ServiceCharacteristicsManager overview:\n";
     size_t idx = 0;
@@ -23,11 +19,11 @@ std::string ServiceCharacteristicsManager::overview() const {
         const ble_uuid128_t* cu = reinterpret_cast<const ble_uuid128_t*>(entry.characteristic->get_uuid());
         snprintf(char_uuid_str, sizeof(char_uuid_str),
             "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-            cu->value[0], cu->value[1], cu->value[2], cu->value[3],
-            cu->value[4], cu->value[5],
-            cu->value[6], cu->value[7],
-            cu->value[8], cu->value[9],
-            cu->value[10], cu->value[11], cu->value[12], cu->value[13], cu->value[14], cu->value[15]);
+            cu->u.u128[0], cu->u.u128[1], cu->u.u128[2], cu->u.u128[3],
+            cu->u.u128[4], cu->u.u128[5],
+            cu->u.u128[6], cu->u.u128[7],
+            cu->u.u128[8], cu->u.u128[9],
+            cu->u.u128[10], cu->u.u128[11], cu->u.u128[12], cu->u.u128[13], cu->u.u128[14], cu->u.u128[15]);
         out += "  [" + std::to_string(idx++) + "] UUID: ";
         out += char_uuid_str;
         out += "\n";
@@ -49,7 +45,7 @@ void ServiceCharacteristicsManager::add_characteristic(std::shared_ptr<Character
         nullptr, // descriptors
         entry.characteristic->get_flags(),
         0, // min_key_size
-        nullptr, // handle pointer, will be set elsewhere if needed
+        &entry.characteristic->handle,
         nullptr // cpfd
     };
     entries.push_back(std::move(entry));
