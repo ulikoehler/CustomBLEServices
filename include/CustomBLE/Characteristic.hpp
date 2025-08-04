@@ -14,8 +14,7 @@ public:
     using ReadCallback = std::function<std::string()>;
     using WriteCallback = std::function<void(const std::string&)>;
 
-    Characteristic(const ble_uuid128_t& characteristic_uuid, 
-                  const std::string& initial_value,
+    Characteristic(const ble_uuid128_t& characteristic_uuid,
                   ReadCallback read_cb = nullptr,
                   WriteCallback write_cb = nullptr);
 
@@ -61,26 +60,26 @@ public:
     template<typename T>
     static Characteristic from_pointer_read_only(const ble_uuid128_t& uuid, T* value_ptr) {
         auto read_cb = make_pointer_read_callback(value_ptr);
-        return Characteristic(uuid, "", read_cb, nullptr);
+        return Characteristic(uuid, read_cb, nullptr);
     }
 
     template<typename T>
     static Characteristic from_pointer_read_write(const ble_uuid128_t& uuid, T* value_ptr) {
         auto read_cb = make_pointer_read_callback(value_ptr);
         auto write_cb = make_pointer_write_callback(value_ptr);
-        return Characteristic(uuid, "", read_cb, write_cb);
+        return Characteristic(uuid, read_cb, write_cb);
     }
 
     template<typename T>
     static Characteristic from_pointer_write_only(const ble_uuid128_t& uuid, T* value_ptr) {
         auto write_cb = make_pointer_write_callback(value_ptr);
-        return Characteristic(uuid, "", nullptr, write_cb);
+        return Characteristic(uuid, nullptr, write_cb);
     }
     
     // Static factory method for fixed value (read-only) characteristics
     static Characteristic from_fixed_value(const ble_uuid128_t& uuid, const std::string& value) {
         ReadCallback read_cb = [value]() { return value; };
-        return Characteristic(uuid, value, read_cb, nullptr);
+        return Characteristic(uuid, read_cb, nullptr);
     }
 
 private:
@@ -88,7 +87,6 @@ private:
     uint16_t handle;
     ReadCallback read_callback;
     WriteCallback write_callback;
-    std::string default_value;
     uint16_t flags;
 };
 

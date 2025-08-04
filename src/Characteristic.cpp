@@ -14,8 +14,6 @@ std::string Characteristic::overview() const {
         uuid.value[10], uuid.value[11], uuid.value[12], uuid.value[13], uuid.value[14], uuid.value[15]);
     std::string out = "Characteristic UUID: ";
     out += uuid_str;
-    out += "\nValue: ";
-    out += default_value;
     out += "\n";
     return out;
 }
@@ -24,12 +22,11 @@ void Characteristic::print() const {
     printf("%s", overview().c_str());
 }
 
-Characteristic::Characteristic(const ble_uuid128_t& characteristic_uuid, 
-                                 const std::string& initial_value,
+Characteristic::Characteristic(const ble_uuid128_t& characteristic_uuid,
                                  ReadCallback read_cb,
                                  WriteCallback write_cb)
-    : uuid(characteristic_uuid), handle(0), read_callback(read_cb), 
-      write_callback(write_cb), default_value(initial_value) {
+    : uuid(characteristic_uuid), handle(0), read_callback(read_cb),
+      write_callback(write_cb) {
     // Set flags based on available callbacks
     flags = 0;
     if (read_callback) {
@@ -53,7 +50,7 @@ int Characteristic::handle_access(uint16_t conn_handle, uint16_t attr_handle, st
             if (read_callback) {
                 value = read_callback();
             } else {
-                value = default_value;
+                value = "";
             }
             rc = os_mbuf_append(ctxt->om, value.c_str(), value.length());
             return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
@@ -69,8 +66,6 @@ int Characteristic::handle_access(uint16_t conn_handle, uint16_t attr_handle, st
                     std::string received_value(buffer);
                     if (write_callback) {
                         write_callback(received_value);
-                    } else {
-                        default_value = received_value;
                     }
                     ESP_LOGI(TAG, "Characteristic updated to: %s", received_value.c_str());
                 }

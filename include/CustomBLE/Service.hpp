@@ -24,13 +24,11 @@ public:
     /**
      * @brief Emplace a new characteristic inline (constructs and adds).
      * @param characteristic_uuid UUID of the characteristic
-     * @param initial_value Initial value for the characteristic
      * @param read_cb Optional read callback
      * @param write_cb Optional write callback
      * @return Shared pointer to the newly added Characteristic
      */
     std::shared_ptr<Characteristic> emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
-                                           const std::string& initial_value,
                                            Characteristic::ReadCallback read_cb = nullptr,
                                            Characteristic::WriteCallback write_cb = nullptr);
 

@@ -63,10 +63,9 @@ void Service::print() const {
 }
 
 std::shared_ptr<Characteristic> Service::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
-                                                const std::string& initial_value,
                                                 Characteristic::ReadCallback read_cb,
                                                 Characteristic::WriteCallback write_cb) {
-    return characteristics_manager.emplace_characteristic(characteristic_uuid, initial_value, read_cb, write_cb);
+    return characteristics_manager.emplace_characteristic(characteristic_uuid, read_cb, write_cb);
 }
 
 } // namespace CustomBLE
