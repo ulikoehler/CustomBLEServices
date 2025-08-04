@@ -23,6 +23,19 @@ service->add_characteristic(Characteristic::from_fixed_value(char_uuid, "Hello B
 service_manager.add_services_to_nimble();
 ```
 
+For example, here's how to add two characteristics with fixed values `A` and `B`:
+
+```cpp
+service->add_characteristic(Characteristic::from_fixed_value(
+    BLE_UUID128_INIT(0xD7, 0xE0, 0x7D, 0xC9, 0x8B, 0xC1, 0x6D, 0x4E, 0xB9, 0xCC, 0x87, 0x82, 0xD8, 0xAA, 0x42, 0xC5),
+    "A")
+);
+service->add_characteristic(Characteristic::from_fixed_value(
+    BLE_UUID128_INIT(0x38, 0x7B, 0x0B, 0x64, 0xC8, 0x46, 0xC6, 0x46, 0xB9, 0xC9, 0x76, 0x4C, 0x87, 0xFC, 0x75, 0xA6),
+    "B")
+);
+```
+
 ## Quick Start: Pointer-Based Characteristics
 
 ### Read-Only Characteristic from Pointer
