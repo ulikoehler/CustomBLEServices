@@ -20,8 +20,7 @@ Service& service = service_manager.emplace_service(service_uuid);
 service.emplace_characteristic(char_uuid, "Hello BLE!");
 
 // Register with NimBLE (see ESP-IDF docs for details)
-ble_gatt_svc_def* svc_defs = service_manager.get_svc_defs();
-// ...register svc_defs with NimBLE...
+service_manager.add_services_to_nimble();
 ```
 
 ## Quick Start: Pointer-Based Characteristics
@@ -132,8 +131,7 @@ service.emplace_characteristic(char_uuid1, "A");
 service.emplace_characteristic(char_uuid2, "B");
 
 // Register all services with NimBLE
-ble_gatt_svc_def* svc_defs = service_manager.get_svc_defs();
-// ...register svc_defs with NimBLE...
+service_manager.add_services_to_nimble();
 ```
 
 ### 4. Advanced: ServiceCharacteristicsManager
