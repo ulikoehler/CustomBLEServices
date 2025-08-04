@@ -29,7 +29,6 @@ public:
     /**
      * @brief Emplace a new characteristic inline (constructs and adds).
      * @param characteristic_uuid UUID of the characteristic
-     * @param initial_value Initial value for the characteristic
      * @param read_cb Optional read callback
      * @param write_cb Optional write callback
      * @return Shared pointer to the newly added Characteristic
