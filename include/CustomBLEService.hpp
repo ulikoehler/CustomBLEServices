@@ -33,6 +33,16 @@ public:
                                            const std::string& initial_value,
                                            Characteristic::ReadCallback read_cb = nullptr,
                                            Characteristic::WriteCallback write_cb = nullptr);
+
+    /**
+     * @brief Generate a string overview of the service and its characteristics.
+     */
+    std::string overview() const;
+
+    /**
+     * @brief Print the overview using printf().
+     */
+    void print() const;
 };
 
 } // namespace CustomBLE

@@ -1,3 +1,18 @@
+    /**
+     * @brief Add all services to NimBLE using ble_gatts_count_cfg and ble_gatts_add_svcs.
+     * @param tag Logging tag for ESP_LOGE
+     * @return 0 on success, error code otherwise
+     */
+    int add_services_to_nimble(const char* tag = "CustomBLE") const;
+    /**
+     * @brief Generate a string overview of all services.
+     */
+    std::string overview() const;
+
+    /**
+     * @brief Print the overview using printf().
+     */
+    void print() const;
 
 #pragma once
 #include "CustomBLEService.hpp"

@@ -2,6 +2,26 @@
 #include "CustomBLECharacteristic.hpp"
 
 namespace CustomBLE {
+std::string Characteristic::overview() const {
+    char uuid_str[40];
+    snprintf(uuid_str, sizeof(uuid_str),
+        "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+        uuid.u.u128[0], uuid.u.u128[1], uuid.u.u128[2], uuid.u.u128[3],
+        uuid.u.u128[4], uuid.u.u128[5],
+        uuid.u.u128[6], uuid.u.u128[7],
+        uuid.u.u128[8], uuid.u.u128[9],
+        uuid.u.u128[10], uuid.u.u128[11], uuid.u.u128[12], uuid.u.u128[13], uuid.u.u128[14], uuid.u.u128[15]);
+    std::string out = "Characteristic UUID: ";
+    out += uuid_str;
+    out += "\nValue: ";
+    out += default_value;
+    out += "\n";
+    return out;
+}
+
+void Characteristic::print() const {
+    printf("%s", overview().c_str());
+}
 
 
 static const char *TAG = "MetexonBLE";

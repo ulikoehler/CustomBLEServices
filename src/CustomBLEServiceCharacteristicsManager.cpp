@@ -11,6 +11,29 @@ Characteristic& ServiceCharacteristicsManager::emplace_characteristic(const ble_
 #include "CustomBLEServiceCharacteristicsManager.hpp"
 
 namespace CustomBLE {
+std::string ServiceCharacteristicsManager::overview() const {
+    std::string out = "ServiceCharacteristicsManager overview:\n";
+    size_t idx = 0;
+    for (const auto& entry : entries) {
+        char char_uuid_str[40];
+        const ble_uuid128_t* cu = reinterpret_cast<const ble_uuid128_t*>(entry.characteristic->get_uuid());
+        snprintf(char_uuid_str, sizeof(char_uuid_str),
+            "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+            cu->u.u128[0], cu->u.u128[1], cu->u.u128[2], cu->u.u128[3],
+            cu->u.u128[4], cu->u.u128[5],
+            cu->u.u128[6], cu->u.u128[7],
+            cu->u.u128[8], cu->u.u128[9],
+            cu->u.u128[10], cu->u.u128[11], cu->u.u128[12], cu->u.u128[13], cu->u.u128[14], cu->u.u128[15]);
+        out += "  [" + std::to_string(idx++) + "] UUID: ";
+        out += char_uuid_str;
+        out += "\n";
+    }
+    return out;
+}
+
+void ServiceCharacteristicsManager::print() const {
+    printf("%s", overview().c_str());
+}
 
 void ServiceCharacteristicsManager::add_characteristic(std::unique_ptr<Characteristic> characteristic) {
     CharacteristicEntry entry;

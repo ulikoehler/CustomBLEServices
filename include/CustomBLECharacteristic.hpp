@@ -1,3 +1,12 @@
+    /**
+     * @brief Generate a string overview of the characteristic.
+     */
+    std::string overview() const;
+
+    /**
+     * @brief Print the overview using printf().
+     */
+    void print() const;
 
 #pragma once
 #include <string>

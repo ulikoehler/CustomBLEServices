@@ -4,7 +4,6 @@
 #include <memory>
 #include <cstddef>
 
-
 namespace CustomBLE {
 
 class CharacteristicsManager {
@@ -48,6 +47,16 @@ public:
      * @brief Get the number of managed characteristics (excluding end marker).
      */
     size_t size() const;
+
+    /**
+     * @brief Generate a string overview of all characteristics.
+     */
+    std::string overview() const;
+
+    /**
+     * @brief Print the overview using printf().
+     */
+    void print() const;
 
 private:
     /**
