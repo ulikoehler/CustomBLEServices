@@ -20,7 +20,6 @@ void Service::add_characteristic(Characteristic&& characteristic) {
 }
 
 ble_gatt_svc_def Service::get_svc_def() {
-    // svc_def.chrs = characteristics_manager.get_chr_defs(); // REMOVE, not present in ble_gatt_svc_def
     return svc_def;
 }
 
