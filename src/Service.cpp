@@ -20,6 +20,7 @@ void Service::add_characteristic(Characteristic&& characteristic) {
 }
 
 ble_gatt_svc_def Service::get_svc_def() {
+    svc_def.characteristics = characteristics_manager.get_chr_defs();
     return svc_def;
 }
 
