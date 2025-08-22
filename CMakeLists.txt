@@ -5,5 +5,5 @@ idf_component_register(
          "src/CustomBLE/Service.cpp"
          "src/CustomBLE/ServiceManager.cpp"
     INCLUDE_DIRS "include"
-    REQUIRES bt
+    REQUIRES bt ble_services
 )

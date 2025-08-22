@@ -41,6 +41,10 @@ public:
      * @brief Print the overview using printf().
      */
     void print() const;
+    /**
+     * @brief Return pointer to the internal 128-bit UUID value
+     */
+    const ble_uuid128_t* get_uuid() const { return &service_uuid; }
 };
 
 } // namespace CustomBLE
