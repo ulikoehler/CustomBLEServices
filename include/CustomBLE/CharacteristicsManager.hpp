@@ -10,6 +10,8 @@ public:
     struct CharacteristicEntry {
         std::shared_ptr<Characteristic> characteristic;
         ble_gatt_chr_def chr_def;
+        // Optional descriptor storage (e.g. user description). If non-empty, chr_def.descriptors points here.
+        std::vector<ble_gatt_dsc_def> descriptors;
     };
 
 private:
