@@ -15,7 +15,14 @@ std::string CharacteristicsManager::overview() const {
             cu->value[6], cu->value[7],
             cu->value[8], cu->value[9],
             cu->value[10], cu->value[11], cu->value[12], cu->value[13], cu->value[14], cu->value[15]);
-        out += "  [" + std::to_string(idx++) + "] UUID: ";
+        out += "  [" + std::to_string(idx++) + "] ";
+        const char* name = entry.characteristic->get_name();
+        if (name) {
+            out += "'";
+            out += name;
+            out += "' ";
+        }
+        out += "UUID: ";
         out += char_uuid_str;
         out += "\n";
     }
@@ -46,7 +53,14 @@ void CharacteristicsManager::add_characteristic(std::shared_ptr<Characteristic> 
 std::shared_ptr<Characteristic> CharacteristicsManager::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
                                                                Characteristic::ReadCallback read_cb,
                                                                Characteristic::WriteCallback write_cb) {
-    auto characteristic = std::make_shared<Characteristic>(characteristic_uuid, read_cb, write_cb);
+    return emplace_characteristic(nullptr, characteristic_uuid, read_cb, write_cb);
+}
+
+std::shared_ptr<Characteristic> CharacteristicsManager::emplace_characteristic(const char* name,
+                                                               const ble_uuid128_t& characteristic_uuid,
+                                                               Characteristic::ReadCallback read_cb,
+                                                               Characteristic::WriteCallback write_cb) {
+    auto characteristic = std::make_shared<Characteristic>(name, characteristic_uuid, read_cb, write_cb);
     add_characteristic(characteristic);
     return characteristic;
 }

@@ -2,8 +2,8 @@
 
 namespace CustomBLE {
 
-Service::Service(const ble_uuid128_t& uuid)
-    : service_uuid(uuid) {
+Service::Service(const char* name, const ble_uuid128_t& uuid)
+    : service_uuid(uuid), name(name) {
     svc_def = {};
     svc_def.type = BLE_GATT_SVC_TYPE_PRIMARY;
     svc_def.uuid = &service_uuid.u;
@@ -37,7 +37,14 @@ std::string Service::overview() const {
         service_uuid.value[9], service_uuid.value[8],
         service_uuid.value[7], service_uuid.value[6],
         service_uuid.value[5], service_uuid.value[4], service_uuid.value[3], service_uuid.value[2], service_uuid.value[1], service_uuid.value[0]);
-    std::string out = "Service UUID: ";
+    std::string out;
+    if (name) {
+        out += "Service '";
+        out += name;
+        out += "' UUID: ";
+    } else {
+        out += "Service UUID: ";
+    }
     out += uuid_str;
     out += "\nCharacteristics:\n";
     size_t idx = 0;
@@ -51,7 +58,14 @@ std::string Service::overview() const {
             cu->value[9], cu->value[8],
             cu->value[7], cu->value[6],
             cu->value[5], cu->value[4], cu->value[3], cu->value[2], cu->value[1], cu->value[0]);
-        out += "  [" + std::to_string(idx++) + "] UUID: ";
+        out += "  [" + std::to_string(idx++) + "] ";
+        const char* cname = entry.characteristic->get_name();
+        if (cname) {
+            out += "'";
+            out += cname;
+            out += "' ";
+        }
+        out += "UUID: ";
         out += char_uuid_str;
         out += "\n";
     }
@@ -65,7 +79,14 @@ void Service::print() const {
 std::shared_ptr<Characteristic> Service::emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
                                                 Characteristic::ReadCallback read_cb,
                                                 Characteristic::WriteCallback write_cb) {
-    return characteristics_manager.emplace_characteristic(characteristic_uuid, read_cb, write_cb);
+    return characteristics_manager.emplace_characteristic(nullptr, characteristic_uuid, read_cb, write_cb);
+}
+
+std::shared_ptr<Characteristic> Service::emplace_characteristic(const char* name,
+                                                const ble_uuid128_t& characteristic_uuid,
+                                                Characteristic::ReadCallback read_cb,
+                                                Characteristic::WriteCallback write_cb) {
+    return characteristics_manager.emplace_characteristic(name, characteristic_uuid, read_cb, write_cb);
 }
 
 } // namespace CustomBLE

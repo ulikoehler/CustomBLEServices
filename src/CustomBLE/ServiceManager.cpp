@@ -19,7 +19,11 @@ int ServiceManager::add_services_to_nimble(const char* tag) {
 }
 
 std::shared_ptr<Service> ServiceManager::emplace_service(const ble_uuid128_t& uuid) {
-    auto service = std::make_shared<Service>(uuid);
+    return emplace_service(nullptr, uuid);
+}
+
+std::shared_ptr<Service> ServiceManager::emplace_service(const char* name, const ble_uuid128_t& uuid) {
+    auto service = std::make_shared<Service>(name, uuid);
     add_service(service);
     return service;
 }

@@ -16,8 +16,8 @@ ble_uuid128_t service_uuid = {/* ... fill with your UUID ... */};
 ble_uuid128_t char_uuid = {/* ... fill with your UUID ... */};
 
 ServiceManager service_manager;
-std::shared_ptr<Service> service = service_manager.emplace_service(service_uuid);
-service->add_characteristic(Characteristic::from_fixed_value(char_uuid, "Hello BLE!"));
+std::shared_ptr<Service> service = service_manager.emplace_service("MyService", service_uuid);
+service->add_characteristic(Characteristic::from_fixed_value("Greeting", char_uuid, "Hello BLE!"));
 
 // Register with NimBLE (see ESP-IDF docs for details)
 service_manager.add_services_to_nimble();
@@ -28,11 +28,11 @@ For example, here's how to add two characteristics with fixed values `A` and `B`
 ```cpp
 service->add_characteristic(Characteristic::from_fixed_value(
     BLE_UUID128_INIT(0xD7, 0xE0, 0x7D, 0xC9, 0x8B, 0xC1, 0x6D, 0x4E, 0xB9, 0xCC, 0x87, 0x82, 0xD8, 0xAA, 0x42, 0xC5),
-    "A")
+    "AChar", "A")
 );
 service->add_characteristic(Characteristic::from_fixed_value(
     BLE_UUID128_INIT(0x38, 0x7B, 0x0B, 0x64, 0xC8, 0x46, 0xC6, 0x46, 0xB9, 0xC9, 0x76, 0x4C, 0x87, 0xFC, 0x75, 0xA6),
-    "B")
+    "BChar", "B")
 );
 ```
 
@@ -90,10 +90,10 @@ extern MotorCurrentSensor getriebemotorCurrentSense;
 ble_uuid128_t motorCurrentUUID = {/* ... */};
 
 ServiceManager service_manager;
-std::shared_ptr<Service> metexonBLEService = service_manager.emplace_service(/* service UUID */);
+std::shared_ptr<Service> metexonBLEService = service_manager.emplace_service("MetexonService", /* service UUID */);
 
 // Add a characteristic that returns the current as raw binary float
-metexonBLEService->emplace_characteristic(
+metexonBLEService->emplace_characteristic("Motor Current",
     motorCurrentUUID,
     []() { return ToBinaryString<float>(getriebemotorCurrentSense.readCurrentAmperes()); }
 );
@@ -113,14 +113,14 @@ auto read_cb = Characteristic::make_pointer_read_callback(&sensor_value);
 ble_uuid128_t char_uuid = {/* ... */};
 
 ServiceManager service_manager;
-std::shared_ptr<Service> service = service_manager.emplace_service(service_uuid);
+std::shared_ptr<Service> service = service_manager.emplace_service("ROService", service_uuid);
 
 // Method 1: Using callback makers with emplace
 auto read_cb = Characteristic::make_pointer_read_callback(&sensor_value);
-service->emplace_characteristic(char_uuid, read_cb);
+service->emplace_characteristic("Sensor Value", char_uuid, read_cb);
 
 // Method 2: Using factory method to create complete characteristic
-auto characteristic = Characteristic::from_pointer_read_only(char_uuid, &sensor_value);
+auto characteristic = Characteristic::from_pointer_read_only("Sensor Value", char_uuid, &sensor_value);
 service->add_characteristic(std::move(characteristic));
 ```
 
@@ -134,15 +134,15 @@ auto read_cb = Characteristic::make_pointer_read_callback(&config_value);
 auto write_cb = Characteristic::make_pointer_write_callback(&config_value);
 
 ServiceManager service_manager;
-std::shared_ptr<Service> service = service_manager.emplace_service(service_uuid);
+std::shared_ptr<Service> service = service_manager.emplace_service("RWService", service_uuid);
 
 // Method 1: Using callback makers with emplace
 auto read_cb = Characteristic::make_pointer_read_callback(&config_value);
 auto write_cb = Characteristic::make_pointer_write_callback(&config_value);
-service->emplace_characteristic(char_uuid, read_cb, write_cb);
+service->emplace_characteristic("Config Value", char_uuid, read_cb, write_cb);
 
 // Method 2: Using factory method to create complete characteristic
-auto characteristic = Characteristic::from_pointer_read_write(char_uuid, &config_value);
+auto characteristic = Characteristic::from_pointer_read_write("Config Value", char_uuid, &config_value);
 service->add_characteristic(std::move(characteristic));
 ```
 
@@ -156,10 +156,10 @@ int command_value = 0;
 ble_uuid128_t char_uuid = {/* ... */};
 
 ServiceManager service_manager;
-std::shared_ptr<Service> service = service_manager.emplace_service(service_uuid);
+std::shared_ptr<Service> service = service_manager.emplace_service("WOService", service_uuid);
 
 // Create write-only characteristic directly from pointer
-auto characteristic = Characteristic::from_pointer_write_only(char_uuid, &command_value);
+auto characteristic = Characteristic::from_pointer_write_only("Command", char_uuid, &command_value);
 service->add_characteristic(std::move(characteristic));
 ```
 
@@ -174,14 +174,14 @@ service->add_characteristic(std::move(characteristic));
 
 auto read_cb = [&]() { return my_value; };
 auto write_cb = [&](const std::string& v) { my_value = v; };
-std::shared_ptr<Service> service = service_manager.emplace_service(service_uuid);
+std::shared_ptr<Service> service = service_manager.emplace_service("InlineService", service_uuid);
 
 // Add a characteristic with custom read/write callbacks
 ble_uuid128_t char_uuid = {/* ... */};
 std::string my_value = "Initial";
 auto read_cb = [&]() { return my_value; };
 auto write_cb = [&](const std::string& v) { my_value = v; };
-service->emplace_characteristic(char_uuid, read_cb, write_cb);
+service->emplace_characteristic("Inline RW", char_uuid, read_cb, write_cb);
 ```
 
 ### 2. Using Manager Classes Directly
@@ -202,7 +202,7 @@ ble_gatt_chr_def* chr_defs = char_manager.get_chr_defs();
 
 ServiceManager service_manager;
 ble_uuid128_t service_uuid = {/* ... */};
-std::shared_ptr<Service> service = service_manager.emplace_service(service_uuid);
+std::shared_ptr<Service> service = service_manager.emplace_service("FullService", service_uuid);
 
 // Add multiple characteristics
 // service->emplace_characteristic(char_uuid1, "A"); // Update to new API as needed
@@ -219,7 +219,7 @@ service_manager.add_services_to_nimble();
 #include <CustomBLE/ServiceCharacteristicsManager.hpp>
 
 ServiceCharacteristicsManager adv_manager;
-adv_manager.emplace_characteristic(char_uuid, read_cb, write_cb);
+adv_manager.emplace_characteristic("Adv RW", char_uuid, read_cb, write_cb);
 ble_gatt_chr_def* chr_defs = adv_manager.get_chr_defs();
 ```
 
@@ -236,7 +236,7 @@ int my_int = 42;
 auto read_cb = make_pointer_read_callback(&my_int);
 auto write_cb = make_pointer_write_callback(&my_int);
 
-service->emplace_characteristic(char_uuid, read_cb, write_cb);
+service->emplace_characteristic("Int RW", char_uuid, read_cb, write_cb);
 ```
 
 #### Fixed Value Callbacks
@@ -248,7 +248,7 @@ std::string my_value = "Initial";
 auto read_cb = make_fixed_read_callback(my_value);
 auto write_cb = make_fixed_write_callback(my_value);
 
-service->emplace_characteristic(char_uuid, read_cb, write_cb);
+service->emplace_characteristic("Fixed RW", char_uuid, read_cb, write_cb);
 ```
 
 ## Notes

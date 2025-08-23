@@ -13,9 +13,15 @@ private:
     ble_uuid128_t service_uuid;
     CharacteristicsManager characteristics_manager;
     ble_gatt_svc_def svc_def;
+    const char* name; // not owned, assumed static lifetime
 
 public:
-    Service(const ble_uuid128_t& uuid);
+    /**
+     * @brief Construct a Service
+     * @param name Optional constant string identifying the service (pointer is NOT copied / owned)
+     * @param uuid 128-bit UUID of the service
+     */
+    Service(const char* name, const ble_uuid128_t& uuid);
     void add_characteristic(std::shared_ptr<Characteristic> characteristic);
     void add_characteristic(Characteristic&& characteristic);
     ble_gatt_svc_def get_svc_def();
@@ -29,6 +35,10 @@ public:
      * @return Shared pointer to the newly added Characteristic
      */
     std::shared_ptr<Characteristic> emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
+                                           Characteristic::ReadCallback read_cb = nullptr,
+                                           Characteristic::WriteCallback write_cb = nullptr) __attribute__((deprecated("Use emplace_characteristic(const char*, ...)")));
+    std::shared_ptr<Characteristic> emplace_characteristic(const char* name,
+                                           const ble_uuid128_t& characteristic_uuid,
                                            Characteristic::ReadCallback read_cb = nullptr,
                                            Characteristic::WriteCallback write_cb = nullptr);
 

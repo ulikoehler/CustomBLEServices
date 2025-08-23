@@ -35,6 +35,10 @@ public:
      */
     std::shared_ptr<Characteristic> emplace_characteristic(const ble_uuid128_t& characteristic_uuid,
                                            Characteristic::ReadCallback read_cb = nullptr,
+                                           Characteristic::WriteCallback write_cb = nullptr) __attribute__((deprecated("Use emplace_characteristic(const char*, ...)")));
+    std::shared_ptr<Characteristic> emplace_characteristic(const char* name,
+                                           const ble_uuid128_t& characteristic_uuid,
+                                           Characteristic::ReadCallback read_cb = nullptr,
                                            Characteristic::WriteCallback write_cb = nullptr);
 
     /**

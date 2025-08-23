@@ -19,7 +19,14 @@ std::string Characteristic::overview() const {
         uuid.value[8], uuid.value[9],
         // node (6 bytes, big-endian)
         uuid.value[10], uuid.value[11], uuid.value[12], uuid.value[13], uuid.value[14], uuid.value[15]);
-    std::string out = "Characteristic UUID: ";
+    std::string out;
+    if (name) {
+        out += "Characteristic '";
+        out += name;
+        out += "' UUID: ";
+    } else {
+        out += "Characteristic UUID: ";
+    }
     out += uuid_str;
     out += "\n";
     return out;
@@ -29,11 +36,12 @@ void Characteristic::print() const {
     printf("%s", overview().c_str());
 }
 
-Characteristic::Characteristic(const ble_uuid128_t& characteristic_uuid,
-                                 ReadCallback read_cb,
-                                 WriteCallback write_cb)
-    : uuid(characteristic_uuid), handle(0), read_callback(read_cb),
-      write_callback(write_cb) {
+Characteristic::Characteristic(const char* name,
+                                                             const ble_uuid128_t& characteristic_uuid,
+                                                             ReadCallback read_cb,
+                                                             WriteCallback write_cb)
+        : uuid(characteristic_uuid), handle(0), read_callback(read_cb),
+            write_callback(write_cb), name(name) {
     // Set flags based on available callbacks
     flags = 0;
     if (read_callback) {
