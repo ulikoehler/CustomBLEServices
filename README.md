@@ -17,7 +17,7 @@ ble_uuid128_t char_uuid = {/* ... fill with your UUID ... */};
 
 ServiceManager service_manager;
 std::shared_ptr<Service> service = service_manager.emplace_service("MyService", service_uuid);
-service->add_characteristic(Characteristic::from_fixed_value("Greeting", char_uuid, "Hello BLE!"));
+service->add_characteristic(Characteristic::from_fixed_value(char_uuid, "Hello BLE!", "Greeting"));
 
 // Register with NimBLE (see ESP-IDF docs for details)
 service_manager.add_services_to_nimble();
@@ -28,11 +28,13 @@ For example, here's how to add two characteristics with fixed values `A` and `B`
 ```cpp
 service->add_characteristic(Characteristic::from_fixed_value(
     BLE_UUID128_INIT(0xD7, 0xE0, 0x7D, 0xC9, 0x8B, 0xC1, 0x6D, 0x4E, 0xB9, 0xCC, 0x87, 0x82, 0xD8, 0xAA, 0x42, 0xC5),
-    "AChar", "A")
+    "A",
+    "AChar")
 );
 service->add_characteristic(Characteristic::from_fixed_value(
     BLE_UUID128_INIT(0x38, 0x7B, 0x0B, 0x64, 0xC8, 0x46, 0xC6, 0x46, 0xB9, 0xC9, 0x76, 0x4C, 0x87, 0xFC, 0x75, 0xA6),
-    "BChar", "B")
+    "B",
+    "BChar")
 );
 ```
 
@@ -103,6 +105,25 @@ metexonBLEService->emplace_characteristic("Motor Current",
 
 ## Quick Start: Pointer-Based Characteristics
 
+## Name argument and automatic User Description
+
+If you pass a `name` (const char*) when creating a `Characteristic`, that name is used for human-readable overviews and — importantly — the library will automatically add a BLE "User Description" descriptor (UUID 0x2901) for that characteristic. The descriptor is read-only and returns the given name to BLE clients.
+
+Notes:
+- The `name` pointer is not owned by the library. Ensure the string stays valid for the lifetime of the characteristic (e.g. use a static string literal or global/static storage).
+- If you don't provide a name (pass `nullptr`), no user description descriptor will be added.
+
+Example:
+
+```cpp
+// The characteristic will include a User Description descriptor containing "Motor Current"
+metexonBLEService->emplace_characteristic("Motor Current",
+    motorCurrentUUID,
+    []() { return ToBinaryString<float>(getriebemotorCurrentSense.readCurrentAmperes()); }
+);
+```
+
+
 ### Read-Only Characteristic from Pointer
 ```cpp
 #include <CustomBLE/ServiceManager.hpp>
@@ -120,7 +141,7 @@ auto read_cb = Characteristic::make_pointer_read_callback(&sensor_value);
 service->emplace_characteristic("Sensor Value", char_uuid, read_cb);
 
 // Method 2: Using factory method to create complete characteristic
-auto characteristic = Characteristic::from_pointer_read_only("Sensor Value", char_uuid, &sensor_value);
+auto characteristic = Characteristic::from_pointer_read_only(char_uuid, &sensor_value, "Sensor Value");
 service->add_characteristic(std::move(characteristic));
 ```
 
@@ -142,7 +163,7 @@ auto write_cb = Characteristic::make_pointer_write_callback(&config_value);
 service->emplace_characteristic("Config Value", char_uuid, read_cb, write_cb);
 
 // Method 2: Using factory method to create complete characteristic
-auto characteristic = Characteristic::from_pointer_read_write("Config Value", char_uuid, &config_value);
+auto characteristic = Characteristic::from_pointer_read_write(char_uuid, &config_value, "Config Value");
 service->add_characteristic(std::move(characteristic));
 ```
 
@@ -159,7 +180,7 @@ ServiceManager service_manager;
 std::shared_ptr<Service> service = service_manager.emplace_service("WOService", service_uuid);
 
 // Create write-only characteristic directly from pointer
-auto characteristic = Characteristic::from_pointer_write_only("Command", char_uuid, &command_value);
+auto characteristic = Characteristic::from_pointer_write_only(char_uuid, &command_value, "Command");
 service->add_characteristic(std::move(characteristic));
 ```
 
