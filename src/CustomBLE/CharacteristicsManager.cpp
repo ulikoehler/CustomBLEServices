@@ -44,7 +44,7 @@ void CharacteristicsManager::add_characteristic(std::shared_ptr<Characteristic> 
         static const ble_uuid16_t user_desc_uuid16 = BLE_UUID16_INIT(0x2901);
         user_desc.uuid = &user_desc_uuid16.u;
         user_desc.att_flags = BLE_ATT_F_READ;
-        user_desc.cb = [](uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg) -> int {
+        user_desc.access_cb = [](uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg) -> int {
             const char* desc = static_cast<const char*>(arg);
             int rc = os_mbuf_append(ctxt->om, desc, strlen(desc));
             return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
@@ -100,7 +100,7 @@ void CharacteristicsManager::update_chr_defs() {
         ble_gatt_chr_def chr = entry.chr_def; // copy
         if (!entry.descriptors.empty()) {
             // Refresh descriptor pointer in case vector storage moved.
-            chr.descriptors = entry.descriptors.data();
+            chr.descriptors = const_cast<ble_gatt_dsc_def*>(entry.descriptors.data());
         }
         chr_defs.push_back(chr);
     }
