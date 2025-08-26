@@ -60,7 +60,7 @@ int Characteristic::handle_access(uint16_t conn_handle, uint16_t attr_handle, st
     int rc;
     switch (ctxt->op) {
         case BLE_GATT_ACCESS_OP_READ_CHR: {
-            ESP_LOGI(TAG, "Characteristic read (handle: %d)", attr_handle);
+            // ESP_LOGI(TAG, "Characteristic read (handle: %d)", attr_handle);
             std::string value;
             if (read_callback) {
                 value = read_callback();
@@ -71,7 +71,7 @@ int Characteristic::handle_access(uint16_t conn_handle, uint16_t attr_handle, st
             return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
         }
         case BLE_GATT_ACCESS_OP_WRITE_CHR: {
-            ESP_LOGI(TAG, "Characteristic write (handle: %d)", attr_handle);
+            // ESP_LOGI(TAG, "Characteristic write (handle: %d)", attr_handle);
             uint16_t om_len = OS_MBUF_PKTLEN(ctxt->om);
             if (om_len > 0) {
                 char buffer[om_len + 1];
