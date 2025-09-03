@@ -74,11 +74,10 @@ int Characteristic::handle_access(uint16_t conn_handle, uint16_t attr_handle, st
             // ESP_LOGI(TAG, "Characteristic write (handle: %d)", attr_handle);
             uint16_t om_len = OS_MBUF_PKTLEN(ctxt->om);
             if (om_len > 0) {
-                char buffer[om_len + 1];
-                rc = ble_hs_mbuf_to_flat(ctxt->om, buffer, sizeof(buffer) - 1, NULL);
+                char buffer[om_len];
+                rc = ble_hs_mbuf_to_flat(ctxt->om, buffer, sizeof(buffer), NULL);
                 if (rc == 0) {
-                    buffer[om_len] = '\0';
-                    std::string received_value(buffer);
+                    std::string received_value(buffer, om_len);
                     if (write_callback) {
                         write_callback(received_value);
                     }
