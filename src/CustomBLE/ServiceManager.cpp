@@ -5,6 +5,13 @@
 namespace CustomBLE {
 int ServiceManager::add_services_to_nimble(const char* tag) {
     ble_gatt_svc_def* svcs = get_svc_defs();
+    if (svcs == nullptr) {
+        ESP_LOGE(tag, "Service definition pointer is null (services=%u, svc_defs=%u)",
+                 static_cast<unsigned>(services.size()),
+                 static_cast<unsigned>(svc_defs.size()));
+        return BLE_HS_EINVAL;
+    }
+
     int rc = ble_gatts_count_cfg(svcs);
     if (rc != 0) {
         ESP_LOGE(tag, "Failed to count GATT services: %d", rc);
@@ -50,6 +57,9 @@ void ServiceManager::add_service(std::shared_ptr<Service> service) {
 
 ble_gatt_svc_def* ServiceManager::get_svc_defs() {
     update_svc_defs();
+    if (svc_defs.empty()) {
+        return nullptr;
+    }
     return svc_defs.data();
 }
 
@@ -59,13 +69,25 @@ size_t ServiceManager::size() const {
 
 void ServiceManager::update_svc_defs() {
     svc_defs.clear();
+    svc_defs.reserve(services.size() + 1);
+
     for (const auto& service : services) {
+        if (!service) {
+            continue;
+        }
         ble_gatt_svc_def svc_def = service->get_svc_def();
+        if (svc_def.type == BLE_GATT_SVC_TYPE_END) {
+            continue;
+        }
+        if (svc_def.uuid == nullptr) {
+            continue;
+        }
         svc_defs.push_back(svc_def);
     }
+
     // Always ensure the last element is the end marker
     ble_gatt_svc_def end_marker = {};
-    end_marker.type = 0;
+    end_marker.type = BLE_GATT_SVC_TYPE_END;
     svc_defs.push_back(end_marker);
 }
 
