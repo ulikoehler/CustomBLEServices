@@ -12,6 +12,21 @@ int ServiceManager::add_services_to_nimble(const char* tag) {
         return BLE_HS_EINVAL;
     }
 
+    // Debug: dump svc_defs to verify pointer validity before calling NimBLE
+    for (int s = 0; svcs[s].type != BLE_GATT_SVC_TYPE_END; s++) {
+        ESP_LOGI(tag, "svc[%d]: type=%u uuid=%p chr=%p", s,
+                 (unsigned)svcs[s].type, (void*)svcs[s].uuid, (void*)svcs[s].characteristics);
+        if (svcs[s].characteristics) {
+            for (int c = 0; svcs[s].characteristics[c].uuid != nullptr; c++) {
+                ESP_LOGI(tag, "  chr[%d]: uuid=%p access_cb=%p dsc=%p flags=0x%x", c,
+                         (void*)svcs[s].characteristics[c].uuid,
+                         (void*)svcs[s].characteristics[c].access_cb,
+                         (void*)svcs[s].characteristics[c].descriptors,
+                         (unsigned)svcs[s].characteristics[c].flags);
+            }
+        }
+    }
+
     int rc = ble_gatts_count_cfg(svcs);
     if (rc != 0) {
         ESP_LOGE(tag, "Failed to count GATT services: %d", rc);
