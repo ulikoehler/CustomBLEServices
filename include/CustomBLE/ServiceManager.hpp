@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <cstddef>
+#include <deque>
 #include <esp_ble_conn_mgr.h>
 
 namespace CustomBLE {
@@ -14,6 +15,9 @@ private:
     std::vector<std::shared_ptr<Service>> services;
     std::vector<ble_gatt_svc_def> svc_defs;
     std::vector<uint8_t> adv_data; // persistent buffer used when populating advertising data
+    std::vector<std::vector<esp_ble_conn_character_t>> conn_mgr_characteristics;
+    std::vector<esp_ble_conn_svc_t> conn_mgr_services;
+    std::deque<std::string> generated_characteristic_names;
 
 public:
     void add_service(std::shared_ptr<Service> service);
@@ -34,6 +38,7 @@ public:
      * @return 0 on success, error code otherwise
      */
     int add_services_to_nimble(const char* tag = "CustomBLE");
+    esp_err_t register_with_conn_mgr();
     
     /**
      * @brief Generate a string overview of all services.
@@ -53,6 +58,12 @@ public:
      */
     void populate_adv_data(esp_ble_conn_config_t &config);
 private:
+    static esp_err_t ble_conn_access_cb(const uint8_t *inbuf,
+                                        uint16_t inlen,
+                                        uint8_t **outbuf,
+                                        uint16_t *outlen,
+                                        void *priv_data,
+                                        uint8_t *att_status);
     void update_svc_defs();
 };
 

@@ -3,6 +3,7 @@
 #include <functional>
 #include <cstring>
 #include <esp_log.h>
+#include <esp_err.h>
 #include <host/ble_gatt.h>
 #include <host/ble_uuid.h>
 #include <host/ble_hs.h>
@@ -36,6 +37,8 @@ public:
     uint16_t get_handle() const;
     void set_read_callback(ReadCallback callback);
     void set_write_callback(WriteCallback callback);
+    std::string read_value() const;
+    void write_value(const std::string& value) const;
 
     /**
      * @brief Generate a string overview of the characteristic.

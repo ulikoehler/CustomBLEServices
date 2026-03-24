@@ -120,6 +120,19 @@ void Characteristic::set_read_callback(ReadCallback callback) {
     }
 }
 
+std::string Characteristic::read_value() const {
+    if (read_callback) {
+        return read_callback();
+    }
+    return {};
+}
+
+void Characteristic::write_value(const std::string& value) const {
+    if (write_callback) {
+        write_callback(value);
+    }
+}
+
 void Characteristic::set_write_callback(WriteCallback callback) {
     write_callback = callback;
     if (callback && !(flags & BLE_GATT_CHR_F_WRITE)) {

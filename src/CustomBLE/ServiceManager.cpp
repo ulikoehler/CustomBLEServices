@@ -1,8 +1,38 @@
 #include "CustomBLE/ServiceManager.hpp"
 #include <algorithm>
+#include <cstdlib>
+#include <unordered_map>
 #include "esp_ble_conn_mgr.h"
 
 namespace CustomBLE {
+namespace {
+
+std::unordered_map<std::string, Characteristic*> g_ble_conn_characteristics;
+
+uint16_t convert_flags(uint16_t flags) {
+    uint16_t converted = 0;
+
+    if (flags & BLE_GATT_CHR_F_READ) {
+        converted |= BLE_CONN_GATT_CHR_READ;
+    }
+    if (flags & BLE_GATT_CHR_F_WRITE) {
+        converted |= BLE_CONN_GATT_CHR_WRITE;
+    }
+    if (flags & BLE_GATT_CHR_F_WRITE_NO_RSP) {
+        converted |= BLE_CONN_GATT_CHR_WRITE_NO_RSP;
+    }
+    if (flags & BLE_GATT_CHR_F_NOTIFY) {
+        converted |= BLE_CONN_GATT_CHR_NOTIFY;
+    }
+    if (flags & BLE_GATT_CHR_F_INDICATE) {
+        converted |= BLE_CONN_GATT_CHR_INDICATE;
+    }
+
+    return converted;
+}
+
+} // namespace
+
 int ServiceManager::add_services_to_nimble(const char* tag) {
     ble_gatt_svc_def* svcs = get_svc_defs();
     if (svcs == nullptr) {
@@ -38,6 +68,130 @@ int ServiceManager::add_services_to_nimble(const char* tag) {
         return rc;
     }
     return 0;
+}
+
+esp_err_t ServiceManager::ble_conn_access_cb(const uint8_t *inbuf,
+                                             uint16_t inlen,
+                                             uint8_t **outbuf,
+                                             uint16_t *outlen,
+                                             void *priv_data,
+                                             uint8_t *att_status) {
+    if (outbuf) {
+        *outbuf = nullptr;
+    }
+    if (outlen) {
+        *outlen = 0;
+    }
+    if (att_status) {
+        *att_status = ESP_IOT_ATT_SUCCESS;
+    }
+
+    const char* characteristic_name = static_cast<const char*>(priv_data);
+    if (!characteristic_name) {
+        if (att_status) {
+            *att_status = ESP_IOT_ATT_INVALID_HANDLE;
+        }
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    auto it = g_ble_conn_characteristics.find(characteristic_name);
+    if (it == g_ble_conn_characteristics.end() || !it->second) {
+        if (att_status) {
+            *att_status = ESP_IOT_ATT_INVALID_HANDLE;
+        }
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    Characteristic* characteristic = it->second;
+    if (!inbuf) {
+        std::string value = characteristic->read_value();
+        if (outlen) {
+            *outlen = static_cast<uint16_t>(value.size());
+        }
+        if (!value.empty() && outbuf) {
+            *outbuf = static_cast<uint8_t*>(malloc(value.size()));
+            if (!*outbuf) {
+                if (att_status) {
+                    *att_status = ESP_IOT_ATT_INSUF_RESOURCE;
+                }
+                if (outlen) {
+                    *outlen = 0;
+                }
+                return ESP_ERR_NO_MEM;
+            }
+            memcpy(*outbuf, value.data(), value.size());
+        }
+        return ESP_OK;
+    }
+
+    characteristic->write_value(std::string(reinterpret_cast<const char*>(inbuf), inlen));
+    return ESP_OK;
+}
+
+esp_err_t ServiceManager::register_with_conn_mgr() {
+    conn_mgr_characteristics.clear();
+    conn_mgr_services.clear();
+    generated_characteristic_names.clear();
+    g_ble_conn_characteristics.clear();
+
+    conn_mgr_characteristics.reserve(services.size());
+    conn_mgr_services.reserve(services.size());
+
+    for (const auto& service : services) {
+        if (!service) {
+            continue;
+        }
+
+        const auto& entries = service->get_characteristics_manager().get_entries();
+        if (entries.empty()) {
+            continue;
+        }
+
+        conn_mgr_characteristics.emplace_back();
+        auto& chars = conn_mgr_characteristics.back();
+        chars.reserve(entries.size());
+
+        for (size_t index = 0; index < entries.size(); ++index) {
+            const auto& entry = entries[index];
+            const char* name = entry.characteristic->get_name();
+            if (!name || !*name) {
+                const ble_uuid128_t* uuid = reinterpret_cast<const ble_uuid128_t*>(entry.characteristic->get_uuid());
+                char generated_name[48];
+                snprintf(generated_name, sizeof(generated_name),
+                         "customble-%02x%02x%02x%02x-%zu",
+                         uuid->value[0], uuid->value[1], uuid->value[2], uuid->value[3], index);
+                generated_characteristic_names.emplace_back(generated_name);
+                name = generated_characteristic_names.back().c_str();
+            }
+
+            esp_ble_conn_character_t chr = {};
+            chr.name = name;
+            chr.type = BLE_CONN_UUID_TYPE_128;
+            memcpy(chr.uuid.uuid128,
+                   reinterpret_cast<const ble_uuid128_t*>(entry.characteristic->get_uuid())->value,
+                   BLE_UUID128_VAL_LEN);
+            chr.flag = convert_flags(entry.characteristic->get_flags());
+            chr.uuid_fn = &ServiceManager::ble_conn_access_cb;
+            chars.push_back(chr);
+            g_ble_conn_characteristics[name] = entry.characteristic.get();
+        }
+
+        esp_ble_conn_svc_t svc = {};
+        svc.type = BLE_CONN_UUID_TYPE_128;
+        svc.nu_lookup_count = static_cast<uint16_t>(chars.size());
+        memcpy(svc.uuid.uuid128, service->get_uuid()->value, BLE_UUID128_VAL_LEN);
+        svc.nu_lookup = chars.data();
+        conn_mgr_services.push_back(svc);
+    }
+
+    for (const auto& svc : conn_mgr_services) {
+        esp_err_t err = esp_ble_conn_add_svc(&svc);
+        if (err != ESP_OK) {
+            return err;
+        }
+    }
+
+    return ESP_OK;
 }
 
 std::shared_ptr<Service> ServiceManager::emplace_service(const ble_uuid128_t& uuid) {
