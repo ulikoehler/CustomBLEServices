@@ -7,6 +7,12 @@
 namespace CustomBLE {
 namespace {
 
+#if CONFIG_METEXON_BLE_VERBOSE_DEBUG
+#define BLE_SERVICE_VERBOSE_LOGI(...) ESP_LOGI(tag, __VA_ARGS__)
+#else
+#define BLE_SERVICE_VERBOSE_LOGI(...)
+#endif
+
 std::unordered_map<std::string, Characteristic*> g_ble_conn_characteristics;
 
 uint16_t convert_flags(uint16_t flags) {
@@ -42,13 +48,13 @@ int ServiceManager::add_services_to_nimble(const char* tag) {
         return BLE_HS_EINVAL;
     }
 
-    // Debug: dump svc_defs to verify pointer validity before calling NimBLE
+    // Verbose-only dump to inspect generated GATT definitions.
     for (int s = 0; svcs[s].type != BLE_GATT_SVC_TYPE_END; s++) {
-        ESP_LOGI(tag, "svc[%d]: type=%u uuid=%p chr=%p", s,
+        BLE_SERVICE_VERBOSE_LOGI("svc[%d]: type=%u uuid=%p chr=%p", s,
                  (unsigned)svcs[s].type, (void*)svcs[s].uuid, (void*)svcs[s].characteristics);
         if (svcs[s].characteristics) {
             for (int c = 0; svcs[s].characteristics[c].uuid != nullptr; c++) {
-                ESP_LOGI(tag, "  chr[%d]: uuid=%p access_cb=%p dsc=%p flags=0x%x", c,
+                BLE_SERVICE_VERBOSE_LOGI("  chr[%d]: uuid=%p access_cb=%p dsc=%p flags=0x%x", c,
                          (void*)svcs[s].characteristics[c].uuid,
                          (void*)svcs[s].characteristics[c].access_cb,
                          (void*)svcs[s].characteristics[c].descriptors,
