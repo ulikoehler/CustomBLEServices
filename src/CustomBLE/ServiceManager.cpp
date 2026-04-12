@@ -4,8 +4,35 @@
 #include <unordered_map>
 #include "esp_ble_conn_mgr.h"
 
+extern "C" {
+#include "nimble/nimble_port_freertos.h"
+}
+
 namespace CustomBLE {
 namespace {
+
+/**
+ * Ensure the NimBLE OS layer (NPL) is ready for ble_hs_lock().
+ *
+ * Background: ble_gatts_count_cfg() only increments counters (no mutex). ble_gatts_add_svcs()
+ * locks ble_hs_mutex via ble_npl_mutex_pend(&ble_hs_mutex) -> npl_funcs->p_ble_npl_mutex_pend.
+ * If esp_ble_conn_init() does not perform the same initialization as a pure nimble_port_init() example,
+ * npl_funcs remains NULL -> LoadProhibited (typically EXCVADDR 0x44 at the function pointer).
+ *
+ * Additionally: sdkconfig without CONFIG_BT_NIMBLE_STATIC_TO_DYNAMIC avoids another crash
+ * in ble_gatts_count_cfg (ble_hs_state_ctx NULL -> EXCVADDR 0x4 at max_services).
+ */
+static int ensure_nimble_npl_ready(const char* tag) {
+    if (npl_freertos_funcs_get() != nullptr) {
+        return 0;
+    }
+    npl_freertos_funcs_init();
+    if (npl_freertos_mempool_init() != 0) {
+        ESP_LOGE(tag, "NimBLE NPL mempool init failed (needed for ble_hs_lock / ble_gatts_add_svcs)");
+        return BLE_HS_EINVAL;
+    }
+    return 0;
+}
 
 #if CONFIG_METEXON_BLE_VERBOSE_DEBUG
 #define BLE_SERVICE_VERBOSE_LOGI(...) ESP_LOGI(tag, __VA_ARGS__)
@@ -40,6 +67,11 @@ uint16_t convert_flags(uint16_t flags) {
 } // namespace
 
 int ServiceManager::add_services_to_nimble(const char* tag) {
+    int npl_rc = ensure_nimble_npl_ready(tag);
+    if (npl_rc != 0) {
+        return npl_rc;
+    }
+
     ble_gatt_svc_def* svcs = get_svc_defs();
     if (svcs == nullptr) {
         ESP_LOGE(tag, "Service definition pointer is null (services=%u, svc_defs=%u)",

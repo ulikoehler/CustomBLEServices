@@ -34,6 +34,11 @@ public:
 
     /**
      * @brief Add all services to NimBLE using ble_gatts_count_cfg and ble_gatts_add_svcs.
+     *
+     * Ensures that NimBLE FreeRTOS NPL (npl_funcs + mutex pools) is initialized:
+     * esp_ble_conn_init() may differ from the "classic" nimble_port_init(); without NPL
+     * ble_gatts_add_svcs() fails inside ble_hs_lock()/ble_npl_mutex_pend (e.g. EXCVADDR 0x44).
+     *
      * @param tag Logging tag for ESP_LOGE
      * @return 0 on success, error code otherwise
      */
